@@ -1,27 +1,27 @@
 # ----
-FROM maven:3.8.3-openjdk-17-slim AS build_image
+FROM maven:3.9.9-eclipse-temurin-17 AS build_image
 
 WORKDIR /var/build/widoco
 
 COPY . .
 
-RUN mvn package && \
+RUN mvn package -DskipTests && \
     mv ./JAR/widoco*.jar ./JAR/widoco.jar
 
 # ----
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jre
 
-RUN apt-get update
-RUN apt-get install -y libfreetype6 fontconfig
+RUN apt-get update && apt-get install -y libfreetype6 fontconfig gosu
 
 RUN useradd widoco
-RUN mkdir -p /usr/local/widoco
-RUN chown -R widoco:widoco /usr/local/widoco
-
-USER widoco
+RUN mkdir -p /usr/local/widoco /output
+RUN chown -R widoco:widoco /usr/local/widoco /output
 
 WORKDIR /usr/local/widoco
 
 COPY --from=build_image /var/build/widoco/JAR/widoco.jar .
+COPY --from=build_image /var/build/widoco/src/main/resources/config ./config
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar widoco.jar ${0} ${@}"]
+ENTRYPOINT ["docker-entrypoint.sh"]

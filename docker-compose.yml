@@ -1,0 +1,47 @@
+services:
+
+    widoco:
+        build: .
+        container_name: widoco
+        profiles: ["generate"]
+        volumes:
+            - widoco-output:/output
+        depends_on:
+            widoco-web:
+                condition: service_healthy
+        networks:
+            - semantic-web
+        restart: "no"
+        # Usage: docker compose run --rm widoco -ontURI http://widoco-web/fuseki/bfo_cco/data -outFolder /output -webVowl -rewriteAll
+
+    widoco-web:
+        image: nginx:1.29.5-alpine
+        container_name: widoco-web
+        ports:
+            - "${PORT:-8484}:80"
+        volumes:
+            - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
+            - widoco-output:/usr/share/nginx/html:ro
+        environment:
+            - FUSEKI_URL=${FUSEKI_URL:-http://fuseki:3030}
+            - FUSEKI_AUTH_HEADER=${FUSEKI_AUTH_HEADER}
+            - NGINX_ENVSUBST_TEMPLATE_VARS=FUSEKI_URL FUSEKI_AUTH_HEADER
+        healthcheck:
+            test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1/ || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 10s
+        networks:
+            - default
+            - semantic-web
+        restart: unless-stopped
+
+volumes:
+    widoco-output:
+
+networks:
+    semantic-web:
+        external: true
+        name: ${DOCKER_NETWORK:-semantic-web}
+        internal: true

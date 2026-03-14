@@ -223,11 +223,13 @@ public final class GuiController {
 		}
 		// this creates tmp files for the conversion assets
 		config = new Configuration();
-		try {
-			this.config.reloadPropertyFile(confPath);
-		} catch (Exception e) {
-			logger.error("Configuration file could not be loaded: " + e.getMessage());
-			return;
+		if (!confPath.isEmpty()) {
+			try {
+				this.config.reloadPropertyFile(confPath);
+			} catch (Exception e) {
+				logger.error("Configuration file could not be loaded: " + e.getMessage());
+				return;
+			}
 		}
 
 		if (generateOnlyCrossRef) {

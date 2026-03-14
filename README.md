@@ -107,44 +107,53 @@ java -jar widoco-VERSION-jar-with-dependencies.jar [OPTIONS]
 ```
 
 ### Docker execution
-If you don't want to use the JAR directly, you may run the project using a [Docker container](https://www.docker.com/). First you will need to download or build the image, and then run it.
+If you don't want to use the JAR directly, you may run the project using a [Docker container](https://www.docker.com/).
 
-#### Reusing a pre-existing image
-We build containers in the [GitHub image registry](https://github.com/dgarijo/Widoco/pkgs/container/widoco) for all latest releases. In order to import one, just run the following command, stating the version of Widoco you prefer (e.g., for v1.4.23):
+#### Standalone usage
 
-```
-docker pull ghcr.io/dgarijo/widoco:v1.4.23
-```
-
-To browse all available images, see the [GitHub image registry](https://github.com/dgarijo/Widoco/pkgs/container/widoco).
-
-#### Building the image yourself
-
-Build the image using the `Dockerfile` in project folder:
+Build the image and run Widoco as a one-off container with a local ontology file:
 
 ```bash
-docker build -t dgarijo/widoco .
-```
-
-#### Running WIDOCO's image
-
-You can now execute WIDOCO through the command line. Usage:
-
-```bash
-docker run -ti --rm dgarijo/widoco [OPTIONS]
-```
-
-**Note:** If you downloaded the image from the GitHub registry, you will have to change `dgarijo/widoco` with the name of the image you downloaded. For example `ghcr.io/dgarijo/widoco:v1.4.23`.
-
-If you want to share data between the Docker Container and your Host, for instance to load a local ontology file (from PATH), you will need to mount the container
-with host directories. For instance:
-
-```bash
+docker build -t widoco .
 docker run -ti --rm \
   -v `pwd`/test:/usr/local/widoco/in:Z \
   -v `pwd`/target/generated-doc:/usr/local/widoco/out:Z \
-  dgarijo/widoco -ontFile in/bne.ttl -outFolder out -rewriteAll
+  widoco -ontFile in/bne.ttl -outFolder out -rewriteAll
 ```
+
+#### Service mesh deployment (Docker Compose)
+
+Widoco can integrate with an ontological service mesh where [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/) serves ontologies and [WebVOWL](https://github.com/VisualDataWeb/WebVOWL) provides visualization, all on a shared Docker network.
+
+1. Copy `.env` and configure credentials:
+   ```bash
+   cp .env.example .env   # edit FUSEKI_AUTH_HEADER, WEBVOWL_URL, etc.
+   ```
+
+2. Start the doc server (nginx proxy + static file serving):
+   ```bash
+   docker compose up -d widoco-web
+   ```
+
+3. Generate documentation and browse at `http://localhost:8484/`.
+
+The `widoco-web` nginx container proxies `/fuseki/` to Fuseki with Basic Auth header injection, so Widoco fetches ontologies without needing credentials in its own code.
+
+**From a local file** (mounted into the container):
+```bash
+docker compose run --rm \
+  -v `pwd`/test:/usr/local/widoco/in:Z \
+  widoco -ontFile in/bne.ttl -outFolder /output/bne -rewriteAll
+```
+
+**From Fuseki** (via the nginx auth proxy):
+```bash
+docker compose run --rm widoco \
+  -ontURI http://widoco-web/fuseki/bfo/data \
+  -outFolder /output/bfo -webVowl -rewriteAll
+```
+
+Multiple ontologies can be documented into separate subdirectories, each accessible under `http://localhost:8484/<subdir>/`.
 
 ### Execution options
 

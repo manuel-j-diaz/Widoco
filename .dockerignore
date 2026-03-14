@@ -3,3 +3,4 @@
 !src/**
 !test/**
 !pom.xml
+!docker-entrypoint.sh
