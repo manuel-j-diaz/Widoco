@@ -9,6 +9,8 @@ services:
         depends_on:
             widoco-web:
                 condition: service_healthy
+        environment:
+            - WEBVOWL_URL=${WEBVOWL_URL}
         networks:
             - semantic-web
         restart: "no"

@@ -114,6 +114,7 @@ public class Configuration {
 	private File tmpFolder; // file where different auxiliary resources might be copied to
 	private boolean createHTACCESS;
 	private boolean createWebVowlVisualization;
+	private String webVowlUrl;
 	private boolean useLicensius;// optional usage of Licensius service.
 	private boolean displaySerializations;// in case someone does not want serializations in their page
 	private boolean displayDirectImportsOnly;// in case someone wants only the direct imports on their page
@@ -1378,6 +1379,9 @@ public class Configuration {
 	public void setCreateWebVowlVisualization(boolean createWebVowlVisualization) {
 		this.createWebVowlVisualization = createWebVowlVisualization;
 	}
+
+	public String getWebVowlUrl() { return webVowlUrl; }
+	public void setWebVowlUrl(String webVowlUrl) { this.webVowlUrl = webVowlUrl; }
 
 	public boolean isUseLicensius() {
 		return useLicensius;

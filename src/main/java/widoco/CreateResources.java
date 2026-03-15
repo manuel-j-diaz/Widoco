@@ -16,7 +16,6 @@
 
 package widoco;
 
-import diagram.DiagramGeneration;
 import diff.CompareOntologies;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -117,11 +116,7 @@ public class CreateResources {
             	logger.info("No previous version provided. No changelog produced!");
 			}
 		}
-		if (c.isCreateWebVowlVisualization()) {
-			DiagramGeneration.generateOntologyDiagram(folderOut, c);
-		}
-
-		// serialize the model in different serializations.
+			// serialize the model in different serializations.
 		OWLOntologyManager om = c.getMainOntology().getOWLAPIOntologyManager();
 		OWLOntology o = c.getMainOntology().getOWLAPIModel();
 		WidocoUtils.writeModel(om, o, new RDFXMLDocumentFormat(), folderOut + File.separator + "ontology.owl");
@@ -290,8 +285,11 @@ public class CreateResources {
                         textToWrite += (swrlRules);
                 }
                 // add the webvowl diagram, if selected
-                if (c.isCreateWebVowlVisualization()) {
-                        textToWrite += "<iframe src=\"webvowl/index.html\"></iframe> ";
+                if (c.isCreateWebVowlVisualization() && c.getWebVowlUrl() != null) {
+                        textToWrite += "<div class=\"webvowl-link\" style=\"text-align:center;margin:20px 0;\">"
+                            + "<a href=\"" + c.getWebVowlUrl() + "\" target=\"_blank\" "
+                            + "style=\"display:inline-block;padding:10px 20px;background:#2196F3;color:white;text-decoration:none;border-radius:4px;font-size:14px;\">"
+                            + "Open WebVOWL Visualization</a></div> ";
                 }
                 textToWrite += "\n";
                 if(!c.isIncludeAllSectionsInOneDocument()){
@@ -500,12 +498,6 @@ public class CreateResources {
 				new File(f.getAbsolutePath() + File.separator + "readme.md"));
 		if (c.isCreateHTACCESS()) {
 			create406Page(s + File.separator + "406.html", c, lang);
-		}
-		// diagram information
-		if (c.isCreateWebVowlVisualization()) {
-			File webvowl = new File(s + File.separator + "webvowl");
-			webvowl.mkdir();
-			WidocoUtils.copyResourceDir(Constants.WEBVOWL_PATH, webvowl);
 		}
 	}
 

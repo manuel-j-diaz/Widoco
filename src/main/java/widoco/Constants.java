@@ -47,9 +47,6 @@ public class Constants {
 	public static final String[] POSSIBLE_VOCAB_SERIALIZATIONS = { "application/rdf+xml", "text/turtle", "text/n3",
 			"application/ld+json" };
 
-	// this is left because in the json-ld schema there must be an image url.
-	public static final String WEBVOWL_SERVICE = "http://vowl.visualdataweb.org/webvowl/#iri=";
-
 	/**
 	 * Constants for loading metadata properties from the ontology
 	 */
@@ -406,7 +403,9 @@ public class Constants {
 "    -includeImportedOntologies: Indicates whether the terms of the imported ontologies of the current ontology\n"
                 + "        should be documented as well or not.\n" +
 "    -htaccess: Create a bundle for publication ready to be deployed on your Apache server.\n" +
-"    -webVowl: Create a visualization based on WebVowl in the documentation.\n" +
+"    -webVowl: Include a link to an external WebVOWL visualization in the documentation.\n" +
+"    -webVowlUrl URL: Set the base URL for the WebVOWL service (default: public WebVOWL).\n"
+                + "        Can also be set via WEBVOWL_URL environment variable.\n" +
 "    -licensius: Use the Licensius web services to retrieve license metadata.\n"
                 + "        Only works if the -getOntologyMetadata flag is enabled.\n" +
 "    -ignoreIndividuals: Individuals will not be included in the documentation.\n" +
@@ -653,8 +652,7 @@ public class Constants {
 	public static String getJSONLDSnippet(Configuration c) {
 		Ontology o = c.getMainOntology();
 		String metadata = "\n\n<!-- SCHEMA.ORG METADATA -->\n<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"TechArticle\","
-				+ "\"url\":\"" + o.getNamespaceURI() + "\"," + "\"image\":\"" + WEBVOWL_SERVICE
-				+ c.getMainOntology().getNamespaceURI() + "\",";
+				+ "\"url\":\"" + o.getNamespaceURI() + "\"," + (c.getWebVowlUrl() != null ? "\"image\":\"" + c.getWebVowlUrl() + "\"," : "");
 		// name (mandatory)
 		metadata += "\"name\":";
 		if (o.getTitle() != null && !"".equals(o.getTitle())) {
@@ -1075,9 +1073,9 @@ public class Constants {
 			head += "</dd>";
 		}
 		// add lang tags here
-		if (c.isCreateWebVowlVisualization()) {
+		if (c.isCreateWebVowlVisualization() && c.getWebVowlUrl() != null) {
 			head += "<dt>" + l.getProperty(LANG_VISUALIZATION) + "</dt>" + "<dd>"
-					+ "<a href=\"webvowl/index.html#\" target=\"_blank\"><img src=\"https://img.shields.io/badge/Visualize_with-WebVowl-blue.svg\" alt=\"Visualize with WebVowl\" /></a>"
+					+ "<a href=\"" + c.getWebVowlUrl() + "\" target=\"_blank\"><img src=\"https://img.shields.io/badge/Visualize_with-WebVowl-blue.svg\" alt=\"Visualize with WebVowl\" /></a>"
 					+ "</dd>\n";
 		}
                 //add commented a reference in case the evaluation is to be included
@@ -1278,8 +1276,6 @@ public class Constants {
 
 	public static final String LODE_PATH = "lode";
 	public static final String OOPS_PATH = "oops";
-	public static final String WEBVOWL_PATH = "webvowl_1.1.7_patched";
-
 	public static final String CONFIG_PATH = "config" + File.separator + "config.properties";
 
 	public static String getEvaluationText(String evaluationContent, Configuration c) {

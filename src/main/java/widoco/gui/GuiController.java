@@ -111,6 +111,7 @@ public final class GuiController {
 			    uniteSections = false, placeHolderText = true, localImports=false;
 		String confPath = "";
 		String code = null;// for tracking analytics.
+		String webVowlUrl = null;
 		String[] languages = null;
 		int i = 0;
 		while (i < args.length) {
@@ -174,6 +175,11 @@ public final class GuiController {
 				break;
 			case "-webVowl":
 				webVowl = true;
+				break;
+			case "-webVowlUrl":
+				webVowlUrl = args[i + 1];
+				webVowl = true;
+				i++;
 				break;
 			case "-licensius":
 				licensius = true;
@@ -251,6 +257,19 @@ public final class GuiController {
 		this.config.setUseImported(includeImportedOntologies);
 		this.config.setCreateHTACCESS(htAccess);
 		this.config.setCreateWebVowlVisualization(webVowl);
+		if (webVowl) {
+			String vowlBase = webVowlUrl;
+			if (vowlBase == null) {
+				vowlBase = System.getenv("WEBVOWL_URL");
+			}
+			if (vowlBase != null) {
+				String fusekiPath = "";
+				if (ontology.contains("/fuseki/")) {
+					fusekiPath = ontology.substring(ontology.indexOf("/fuseki/"));
+				}
+				this.config.setWebVowlUrl(vowlBase + fusekiPath);
+			}
+		}
 		this.config.setUseLicensius(licensius);
 		this.config.setIncludeNamedIndividuals(includeNamedIndividuals);
 		this.config.setIncludeAnnotationProperties(includeAnnotationProperties);

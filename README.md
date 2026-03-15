@@ -61,7 +61,7 @@ Features of WIDOCO:
 * Automatic annotation in JSON-LD snippets of the html produced.
 * Association of a provenance page which includes the history of your vocabulary (W3C PROV-O compliant).
 * Guidelines on the main sections that your document should have and how to complete them.
-* Integration with diagram creators ([WebVOWL](http://vowl.visualdataweb.org/webvowl/)).
+* Integration with external [WebVOWL](https://github.com/manuel-j-diaz/WebVOWL) visualization services via configurable URL.
 * Automatic changelog of differences between the actual and the previous version of the ontology (based on [Bubastis](http://www.ebi.ac.uk/efo/bubastis/)).
 * Separation of the sections of your html page so you can write them independently and replace only those needed.
 * Content negotiation and serialization of your ontology according to [W3C best practices](https://www.w3.org/TR/swbp-vocab-pub/)
@@ -146,12 +146,13 @@ docker compose run --rm \
   widoco -ontFile in/bne.ttl -outFolder /output/bne -rewriteAll
 ```
 
-**From Fuseki** (via the nginx auth proxy):
+**From Fuseki** (via the nginx auth proxy, with WebVOWL visualization link):
 ```bash
 docker compose run --rm widoco \
   -ontURI http://widoco-web/fuseki/bfo/data \
   -outFolder /output/bfo -webVowl -rewriteAll
 ```
+When `WEBVOWL_URL` is set in `.env` (e.g., `http://localhost:9090/#iri=http://server`), the generated docs will include a link to the external WebVOWL service with the Fuseki path auto-appended.
 
 Multiple ontologies can be documented into separate subdirectories, each accessible under `http://localhost:8484/<subdir>/`.
 
@@ -212,7 +213,9 @@ Multiple ontologies can be documented into separate subdirectories, each accessi
 
 `--version`: Shows the current version of WIDOCO.
 
-`-webVowl`: Create a visualization based on WebVowl (http://vowl.visualdataweb.org/webvowl/index.html#) in the documentation.
+`-webVowl`: Include a link to an external WebVOWL visualization in the documentation. Requires `-webVowlUrl` or the `WEBVOWL_URL` environment variable to be set.
+
+`-webVowlUrl URL`: Set the base URL for the WebVOWL service (e.g., `http://localhost:9090/#iri=http://server`). Can also be set via the `WEBVOWL_URL` environment variable. When `-ontURI` contains `/fuseki/`, the path is auto-appended to the base URL.
 
 
 ## How can I make WIDOCO automatically recognize my vocabulary annotations?
