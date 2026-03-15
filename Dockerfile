@@ -1,5 +1,5 @@
 # ----
-FROM maven:3.9.9-eclipse-temurin-17 AS build_image
+FROM maven:3.9.14-amazoncorretto-25-alpine AS build_image
 
 WORKDIR /var/build/widoco
 
@@ -9,11 +9,11 @@ RUN mvn package -DskipTests && \
     mv ./JAR/widoco*.jar ./JAR/widoco.jar
 
 # ----
-FROM eclipse-temurin:17-jre
+FROM amazoncorretto:25-alpine
 
-RUN apt-get update && apt-get install -y libfreetype6 fontconfig gosu jq
+RUN apk add --no-cache fontconfig freetype gosu jq
 
-RUN useradd widoco
+RUN adduser -D widoco
 RUN mkdir -p /usr/local/widoco /output
 RUN chown -R widoco:widoco /usr/local/widoco /output
 

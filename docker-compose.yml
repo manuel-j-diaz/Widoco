@@ -17,7 +17,7 @@ services:
         # Usage: docker compose run --rm widoco -ontURI http://widoco-web/fuseki/bfo_cco/data -outFolder /output -webVowl -rewriteAll
 
     widoco-web:
-        image: nginx:1.29.5-alpine
+        image: nginx:1.29.6-alpine3.23-slim
         container_name: widoco-web
         ports:
             - "${PORT:-8484}:80"

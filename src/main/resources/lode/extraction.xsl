@@ -2092,25 +2092,25 @@ http://www.oxygenxml.com/ns/doc/xsl ">
 
     <xsl:function name="f:hasSubclasses" as="xs:boolean">
         <xsl:param name="el" as="element()"/>
-        <xsl:value-of
+        <xsl:sequence
                 select="exists($rdf/(owl:Class|rdfs:Class)[some $res in rdfs:subClassOf/(@*:resource|(owl:Class|rdfs:Class)/@*:about) satisfies $res = $el/(@*:about|@*:ID)])"/>
     </xsl:function>
 
     <xsl:function name="f:hasMembers" as="xs:boolean">
         <xsl:param name="el" as="element()"/>
-        <xsl:value-of
+        <xsl:sequence
                 select="exists($rdf/owl:NamedIndividual[some $res in rdf:type/@*:resource satisfies $res = $el/(@*:about|@*:ID)])"/>
     </xsl:function>
 
     <xsl:function name="f:isInRange" as="xs:boolean">
         <xsl:param name="el" as="element()"/>
-        <xsl:value-of
+        <xsl:sequence
                 select="exists($rdf/(owl:ObjectProperty|owl:DatatypeProperty|owl:AnnotationProperty)[some $res in (rdfs:range|schema:rangeIncludes)/(@*:resource|(owl:Class|rdfs:Class)/@*:about) satisfies $res = $el/(@*:about|@*:ID)])"/>
     </xsl:function>
 
     <xsl:function name="f:isInDomain" as="xs:boolean">
         <xsl:param name="el" as="element()"/>
-        <xsl:value-of
+        <xsl:sequence
         select="exists($rdf/(owl:ObjectProperty|owl:DatatypeProperty|owl:AnnotationProperty)[some $res in (rdfs:domain|schema:domainIncludes)/(@*:resource|(owl:Class|rdfs:Class|owl:Class/owl:unionOf/rdf:Description)/@*:about) satisfies $res = $el/(@*:about|@*:ID)])"/>
     </xsl:function>
 
