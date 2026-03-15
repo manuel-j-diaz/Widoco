@@ -11,7 +11,7 @@ RUN mvn package -DskipTests && \
 # ----
 FROM eclipse-temurin:17-jre
 
-RUN apt-get update && apt-get install -y libfreetype6 fontconfig gosu
+RUN apt-get update && apt-get install -y libfreetype6 fontconfig gosu jq
 
 RUN useradd widoco
 RUN mkdir -p /usr/local/widoco /output

@@ -123,38 +123,47 @@ docker run -ti --rm \
 
 #### Service mesh deployment (Docker Compose)
 
-Widoco can integrate with an ontological service mesh where [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/) serves ontologies and [WebVOWL](https://github.com/VisualDataWeb/WebVOWL) provides visualization, all on a shared Docker network.
+Widoco can integrate with an ontological service mesh where [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/) serves ontologies and [WebVOWL](https://github.com/manuel-j-diaz/WebVOWL) provides visualization, all on a shared Docker network (`semantic-web`).
 
-1. Copy `.env` and configure credentials:
+**Prerequisites:** The following services must be started in order before generating documentation:
+
+1. **Fuseki** — ontology triplestore (based on [`jena-fuseki`](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile)):
    ```bash
-   cp .env.example .env   # edit FUSEKI_AUTH_HEADER, WEBVOWL_URL, etc.
+   cd ../fuseki_ops && docker compose up -d
    ```
 
-2. Start the doc server (nginx proxy + static file serving):
+2. **WebVOWL** — ontology visualization (from [`webVowl`](https://github.com/manuel-j-diaz/WebVOWL)):
    ```bash
+   cd ../webVowl && docker compose up -d
+   ```
+
+3. **Widoco** — doc server (this repo):
+   ```bash
+   cp .env.example .env   # edit FUSEKI_AUTH_HEADER, WEBVOWL_URL, etc.
    docker compose up -d widoco-web
    ```
 
-3. Generate documentation and browse at `http://localhost:8484/`.
+All three stacks share the `semantic-web` Docker network. The `widoco-web` nginx container proxies `/fuseki/` to Fuseki with Basic Auth header injection, so Widoco fetches ontologies without needing credentials in its own code.
 
-The `widoco-web` nginx container proxies `/fuseki/` to Fuseki with Basic Auth header injection, so Widoco fetches ontologies without needing credentials in its own code.
+**Generating documentation:**
 
-**From a local file** (mounted into the container):
+Helper scripts are provided to generate docs from Fuseki. See [scripts/README.md](scripts/README.md) for full details.
+
+```bash
+./scripts/generate-all-fuseki.sh                       # all Fuseki datasets
+./scripts/generate-fuseki.sh --name bfo --name bfo_cco # specific datasets
+```
+
+Each dataset is output to its own subdirectory, accessible at `http://localhost:8484/<dataset>/index-en.html`.
+
+When `WEBVOWL_URL` is set in `.env` (e.g., `http://localhost:9090/#iri=http://server`), the generated docs will include a link to the external WebVOWL service with the Fuseki path auto-appended.
+
+**From a local file** (without Fuseki):
 ```bash
 docker compose run --rm \
   -v `pwd`/test:/usr/local/widoco/in:Z \
   widoco -ontFile in/bne.ttl -outFolder /output/bne -rewriteAll
 ```
-
-**From Fuseki** (via the nginx auth proxy, with WebVOWL visualization link):
-```bash
-docker compose run --rm widoco \
-  -ontURI http://widoco-web/fuseki/bfo/data \
-  -outFolder /output/bfo -webVowl -rewriteAll
-```
-When `WEBVOWL_URL` is set in `.env` (e.g., `http://localhost:9090/#iri=http://server`), the generated docs will include a link to the external WebVOWL service with the Fuseki path auto-appended.
-
-Multiple ontologies can be documented into separate subdirectories, each accessible under `http://localhost:8484/<subdir>/`.
 
 ### Execution options
 
